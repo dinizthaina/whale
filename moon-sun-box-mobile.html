@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>moon-sun-box</title>
+  <link href="https://fonts.googleapis.com/css2?family=Meow+Script&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      background-color: #0b1d3a;
+      font-family: 'Meow Script', cursive;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      color: white;
+      padding: 10px;
+    }
+
+    #baleia {
+      width: 200px;
+      height: auto;
+      transition: transform 1s ease-in-out;
+      transform-style: preserve-3d;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    #frase {
+      font-size: 1.8rem;
+      margin-top: 20px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    #dica {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      color: #fff9;
+    }
+
+    .estrela {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: cair 3s linear forwards;
+      z-index: 0;
+    }
+
+    @keyframes cair {
+      0% {
+        transform: translateY(0);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(100vh);
+        opacity: 0;
+      }
+    }
+
+    .lua {
+      position: absolute;
+      bottom: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      z-index: 1;
+      box-shadow: 0 0 60px rgba(255, 255, 255, 0.3);
+      animation: subirLua 8s ease-out forwards;
+      opacity: 0.9;
+      background: radial-gradient(circle at 30% 30%, #f0f0f0, #d9d9d9, #aaa);
+      transition: background 1s ease;
+    }
+
+    @keyframes subirLua {
+      0% {
+        bottom: -200px;
+        opacity: 0;
+      }
+      100% {
+        bottom: 20px;
+        opacity: 1;
+      }
+    }
+
+    .fase-1 {
+      background: radial-gradient(circle at 30% 30%, #f0f0f0, #d9d9d9, #aaa);
+    }
+
+    .fase-2 {
+      background: radial-gradient(circle, #ccc 40%, #888 70%);
+    }
+
+    .fase-3 {
+      background: radial-gradient(circle at right, #444 45%, #bbb 90%);
+    }
+
+    .fase-4 {
+      background: radial-gradient(circle at left, #bbb 45%, #444 90%);
+    }
+
+    .fase-5 {
+      background: radial-gradient(circle, #f0f0f0 20%, #bbb 80%);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="dica">Clique na baleia</div>
+    <img id="baleia" src="https://i.postimg.cc/dD39ynmg/baleia-frente.jpg" alt="Baleia mágica" />
+    <div id="frase"></div>
+  </div>
+  <div class="lua fase-1" id="lua"></div>
+  <audio id="musica" src="Lisboa.mp3" loop></audio>
+
+  <script>
+    const baleia = document.getElementById('baleia');
+    const frase = document.getElementById('frase');
+    const dica = document.getElementById('dica');
+    const musica = document.getElementById('musica');
+    const lua = document.getElementById('lua');
+
+    let virada = false;
+    let tocou = false;
+
+    const frases = [
+      "Eu te amo",
+      "Eu oceano você",
+      "Chucrute",
+      "T♡L",
+      "Você é meu mar",
+      "Você é minha prioridade",
+      "Meu coração soletra seu nome",
+      "Você é meu universo",
+      "Oceano de carinho",
+      "Te amo mais que estrelas",
+      "Meu coração é seu",
+      "Nós somos uma constelação",
+      "Meu amor é mais profundo que o mar",
+      "Você é minha lua cheia",
+      "Eu vou casar com você",
+      "Me apaixonei por você mais uma vez",
+      "Sempre sua",
+      "Você é meu lugar seguro",
+      "Sua voz é meu som favorito",
+      "Meu coração dança com o seu",
+      "O amor mora no seu sorriso",
+      "Você é o meu sol depois da tempestade",
+      "Quero todos os meus dias com você",
+      "Você acalma minhas ondas",
+      "Você é meu farol na escuridão",
+      "Nosso amor é infinito como o céu",
+      "Você é poesia em forma de gente",
+      "Você me faz acreditar no amor",
+      "Eu sou completamente sua",
+      "Seu abraço é meu lar"
+    ];
+
+    const fases = ["fase-1", "fase-2", "fase-3", "fase-4", "fase-5"];
+
+    function criarEstrelas() {
+      for (let i = 0; i < 30; i++) {
+        const estrela = document.createElement("div");
+        estrela.classList.add("estrela");
+        estrela.style.left = Math.random() * 100 + "vw";
+        estrela.style.top = Math.random() * -50 + "px";
+        estrela.style.animationDuration = 2 + Math.random() * 2 + "s";
+        document.body.appendChild(estrela);
+        setTimeout(() => estrela.remove(), 4000);
+      }
+    }
+
+    baleia.addEventListener('click', () => {
+      if (!tocou) {
+        musica.play().catch(() => {});
+        tocou = true;
+      }
+
+      if (virada) return;
+
+      virada = true;
+      dica.style.display = 'none';
+      criarEstrelas();
+      baleia.style.transform = "rotateY(180deg)";
+      baleia.src = "https://i.postimg.cc/w3rQcJwM/baleia-verso.jpg";
+
+      const fraseEscolhida = frases[Math.floor(Math.random() * frases.length)];
+      setTimeout(() => {
+        frase.textContent = fraseEscolhida;
+        frase.style.opacity = 1;
+      }, 800);
+
+      // Fases da lua
+      let faseIndex = 0;
+      const faseInterval = setInterval(() => {
+        lua.className = "lua " + fases[faseIndex];
+        faseIndex = (faseIndex + 1) % fases.length;
+      }, 2000);
+
+      setTimeout(() => {
+        clearInterval(faseInterval);
+        lua.className = "lua fase-1";
+        baleia.style.transform = "rotateY(0deg)";
+        baleia.src = "https://i.postimg.cc/dD39ynmg/baleia-frente.jpg";
+        frase.style.opacity = 0;
+        frase.textContent = "";
+        virada = false;
+        dica.style.display = 'block';
+      }, 7000);
+    });
+  </script>
+</body>
+</html>
