@@ -4,13 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>moon-sun-box</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Meow+Script&display=swap" rel="stylesheet" />
+
   <style>
     body {
       margin: 0;
       background-color: #0b1d3a;
       font-family: 'Meow Script', cursive;
       overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+      text-align: center;
       position: relative;
     }
 
@@ -18,20 +26,14 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-      color: white;
-      padding: 10px;
+      z-index: 2;
     }
 
     #baleia {
       width: 300px;
       height: auto;
       transition: transform 1s ease-in-out;
-      transform-style: preserve-3d;
       cursor: pointer;
-      z-index: 2;
     }
 
     #frase {
@@ -42,184 +44,195 @@
     }
 
     #dica {
-      font-size: 2rem;
+      font-size: 1.8rem;
       margin-bottom: 15px;
       color: #fff9;
-    }
-
-    .estrela {
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: white;
-      border-radius: 50%;
-      opacity: 0.8;
-      animation: cair 3s linear forwards;
-      z-index: 0;
-    }
-
-    @keyframes cair {
-      0% {
-        transform: translateY(0);
-        opacity: 0.8;
-      }
-      100% {
-        transform: translateY(100vh);
-        opacity: 0;
-      }
+      text-shadow: 0 0 10px #fff, 0 0 20px #0ff;
     }
 
     .lua {
       position: absolute;
-      bottom: -200px;
+      bottom: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: 150px;
-      height: 150px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
+      background-color: #fdf5e6;
+      animation: subirLua 6s forwards, mudarCor 6s linear;
       z-index: 1;
-      box-shadow: 0 0 60px rgba(255, 255, 255, 0.3);
-      animation: subirLua 8s ease-out forwards;
-      opacity: 0.9;
-      background: radial-gradient(circle at 30% 30%, #f0f0f0, #d9d9d9, #aaa);
-      transition: background 1s ease;
     }
 
     @keyframes subirLua {
-      0% {
-        bottom: -200px;
-        opacity: 0;
-      }
-      100% {
-        bottom: 20px;
-        opacity: 1;
-      }
+      0% { bottom: 0; }
+      100% { bottom: 100%; }
     }
 
-    .fase-1 {
-      background: radial-gradient(circle at 30% 30%, #f0f0f0, #d9d9d9, #aaa);
+    @keyframes mudarCor {
+      0% { background-color: #87ceeb; }
+      25% { background-color: #f9d71c; }
+      50% { background-color: #ffffff; }
+      75% { background-color: #fffacd; }
+      100% { background-color: #fdf5e6; }
     }
 
-    .fase-2 {
-      background: radial-gradient(circle, #ccc 40%, #888 70%);
+    .estrela {
+      position: absolute;
+      top: -10px;
+      width: 5px;
+      height: 5px;
+      background-color: white;
+      border-radius: 50%;
+      animation: cair 6s linear infinite;
+      opacity: 0.8;
+      box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #0ff;
     }
 
-    .fase-3 {
-      background: radial-gradient(circle at right, #444 45%, #bbb 90%);
+    @keyframes cair {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(110vh); }
     }
 
-    .fase-4 {
-      background: radial-gradient(circle at left, #bbb 45%, #444 90%);
+    .controles {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
     }
 
-    .fase-5 {
-      background: radial-gradient(circle, #f0f0f0 20%, #bbb 80%);
+    .botao {
+      background-color: #fff2;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 15px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 0 5px #0ff;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div id="dica">Clique na baleia</div>
-    <img id="baleia" src="https://i.postimg.cc/dD39ynmg/baleia-frente.jpg" alt="Baleia mágica" />
+    <img id="baleia" src="https://i.postimg.cc/BZCLj5JC/Picsart-25-04-09-14-45-33-761.png" alt="Baleia mágica" />
+    <div class="controles">
+      <button class="botao" onclick="voltar()">⏮</button>
+      <button class="botao" onclick="pausarOuTocar()">⏯</button>
+      <button class="botao" onclick="avancar()">⏭</button>
+    </div>
     <div id="frase"></div>
   </div>
-  <div class="lua fase-1" id="lua"></div>
-  <audio id="musica" src="Lisboa.mp3" loop></audio>
+
+  <audio id="player" loop></audio>
 
   <script>
     const baleia = document.getElementById('baleia');
     const frase = document.getElementById('frase');
     const dica = document.getElementById('dica');
-    const musica = document.getElementById('musica');
-    const lua = document.getElementById('lua');
-
-    let virada = false;
-    let tocou = false;
+    const player = document.getElementById('player');
 
     const frases = [
-      "Eu te amo",
-      "Eu oceano você",
-      "Chucrute",
-      "T♡L",
-      "Você é meu mar",
-      "Você é minha prioridade",
-      "Meu coração soletra seu nome",
-      "Você é meu universo",
-      "Oceano de carinho",
-      "Te amo mais que estrelas",
-      "Meu coração é seu",
-      "Nós somos uma constelação",
-      "Meu amor é mais profundo que o mar",
-      "Você é minha lua cheia",
-      "Eu vou casar com você",
-      "Me apaixonei por você mais uma vez",
-      "Sempre sua",
-      "Você é meu lugar seguro",
-      "Sua voz é meu som favorito",
-      "Meu coração dança com o seu",
-      "O amor mora no seu sorriso",
-      "Você é o meu sol depois da tempestade",
-      "Quero todos os meus dias com você",
-      "Você acalma minhas ondas",
-      "Você é meu farol na escuridão",
-      "Nosso amor é infinito como o céu",
-      "Você é poesia em forma de gente",
-      "Você me faz acreditar no amor",
-      "Eu sou completamente sua",
+      "Eu te amo", "Eu oceano você", "Chucrute", "T♡L", "Você é meu mar",
+      "Você é minha prioridade", "Meu coração soletra seu nome", "Você é meu universo",
+      "Oceano de carinho", "Te amo mais que estrelas", "Meu coração é seu",
+      "Nós somos uma constelação", "Meu amor é mais profundo que o mar",
+      "Você é minha lua cheia", "Eu vou casar com você", "Me apaixonei por você mais uma vez",
+      "Sempre sua", "Você é meu lugar seguro", "Sua voz é meu som favorito",
+      "Meu coração dança com o seu", "O amor mora no seu sorriso",
+      "Você é o meu sol depois da tempestade", "Quero todos os meus dias com você",
+      "Você acalma minhas ondas", "Você é meu farol na escuridão",
+      "Nosso amor é infinito como o céu", "Você é poesia em forma de gente",
+      "Você me faz acreditar no amor", "Eu sou completamente sua",
       "Seu abraço é meu lar"
     ];
 
-    const fases = ["fase-1", "fase-2", "fase-3", "fase-4", "fase-5"];
+    const musicas = [
+      "Lisboa.mp3",
+      "Tudo que você quiser.mp3",
+      "Eu e Você Contra o Mundo.mp3",
+      "Samba in Paris.mp3",
+      "Prefiro Você.mp3"
+    ];
 
-    function criarEstrelas() {
-      for (let i = 0; i < 30; i++) {
-        const estrela = document.createElement("div");
-        estrela.classList.add("estrela");
-        estrela.style.left = Math.random() * 100 + "vw";
-        estrela.style.top = Math.random() * -50 + "px";
-        estrela.style.animationDuration = 2 + Math.random() * 2 + "s";
+    let indexMusica = 0;
+    let virada = false;
+    let tocou = false;
+
+    function tocarMusica() {
+      player.src = musicas[indexMusica];
+      player.play().catch(() => {});
+    }
+
+    function avancar() {
+      indexMusica = (indexMusica + 1) % musicas.length;
+      tocarMusica();
+    }
+
+    function voltar() {
+      indexMusica = (indexMusica - 1 + musicas.length) % musicas.length;
+      tocarMusica();
+    }
+
+    function pausarOuTocar() {
+      if (player.paused) {
+        player.play();
+      } else {
+        player.pause();
+      }
+    }
+
+    player.addEventListener("ended", () => {
+      avancar();
+    });
+
+    function criarLua() {
+      const lua = document.createElement('div');
+      lua.classList.add('lua');
+      document.body.appendChild(lua);
+      setTimeout(() => lua.remove(), 6000);
+    }
+
+    function criarEstrelas(qtd) {
+      for (let i = 0; i < qtd; i++) {
+        const estrela = document.createElement('div');
+        estrela.classList.add('estrela');
+        estrela.style.left = Math.random() * 100 + 'vw';
+        estrela.style.animationDuration = (Math.random() * 2 + 4) + 's';
         document.body.appendChild(estrela);
-        setTimeout(() => estrela.remove(), 4000);
+        setTimeout(() => estrela.remove(), 6000);
       }
     }
 
     baleia.addEventListener('click', () => {
+      if (virada) return;
+      virada = true;
+
       if (!tocou) {
-        musica.play().catch(() => {});
+        tocarMusica();
         tocou = true;
       }
 
-      if (virada) return;
-
-      virada = true;
       dica.style.display = 'none';
-      criarEstrelas();
-      baleia.style.transform = "rotateY(180deg)";
-      baleia.src = "https://i.postimg.cc/w3rQcJwM/baleia-verso.jpg";
+      baleia.style.transform = 'rotateY(180deg)';
+      baleia.src = "https://i.postimg.cc/4xYm2rV8/Picsart-25-04-09-14-45-51-563.png";
 
-      const fraseEscolhida = frases[Math.floor(Math.random() * frases.length)];
+      const fraseAleatoria = frases[Math.floor(Math.random() * frases.length)];
       setTimeout(() => {
-        frase.textContent = fraseEscolhida;
+        frase.textContent = fraseAleatoria;
         frase.style.opacity = 1;
       }, 800);
 
-      // Fases da lua
-      let faseIndex = 0;
-      const faseInterval = setInterval(() => {
-        lua.className = "lua " + fases[faseIndex];
-        faseIndex = (faseIndex + 1) % fases.length;
-      }, 2000);
+      criarLua();
+      criarEstrelas(30);
 
       setTimeout(() => {
-        clearInterval(faseInterval);
-        lua.className = "lua fase-1";
-        baleia.style.transform = "rotateY(0deg)";
-        baleia.src = "https://i.postimg.cc/dD39ynmg/baleia-frente.jpg";
         frase.style.opacity = 0;
         frase.textContent = "";
-        virada = false;
+        baleia.style.transform = 'rotateY(0deg)';
+        baleia.src = "https://i.postimg.cc/BZCLj5JC/Picsart-25-04-09-14-45-33-761.png";
         dica.style.display = 'block';
-      }, 7000);
+        virada = false;
+      }, 6000);
     });
   </script>
 </body>
